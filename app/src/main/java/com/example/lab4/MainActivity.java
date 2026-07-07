@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextPrice;
     private List<Product> products;
     private ListView listViewProducts;
- 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
