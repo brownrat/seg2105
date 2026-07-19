@@ -8,10 +8,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.wear.activity.ConfirmationActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,35 +22,49 @@ public class MainActivity extends AppCompatActivity {
     private String drawableName;
     private ActivityResultLauncher<Intent> logoLauncher;
 
-    public void setLogo(View view) {
-        Intent intent = new Intent(this, LogoSelectActivity.class);
-        logoLauncher.launch(intent);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        logoImage = findViewById(R.id.logoImage);
+        logoLauncher = registerForActivityResult(new
+                ActivityResultContracts.StartActivityForResult(), (result -> {
+            ImageView logoImage = (ImageView) findViewById(R.id.logoImage);
+            drawableName = "ic_logo_00";
+            Intent data = result.getData();
+            int imageID = data.getIntExtra("imageID", R.id.teamid00);
+            if (imageID == R.id.teamid00) {
+                drawableName = "ic_logo_00";
+            } else if (imageID == R.id.teamid01) {
+                drawableName = "ic_logo_01";
+            } else if (imageID == R.id.teamid02) {
+                drawableName = "ic_logo_02";
+            } else if (imageID == R.id.teamid03) {
+                drawableName = "ic_logo_03";
+            } else if (imageID == R.id.teamid04) {
+                drawableName = "ic_logo_04";
+            } else if (imageID == R.id.teamid05) {
+                drawableName = "ic_logo_05";
+            } else {
+                drawableName = "ic_logo_00";
+            }
+            int resID = getResources().getIdentifier(drawableName, "drawable",
+                    getPackageName());
+            logoImage.setImageResource(resID);
+        }));
     }
 
-    logoImage = findViewById(R.id.logoImage);
-    logoLauncher = registerForActivityResult(new
-                                             ActivityResultContracts.StartActivityForResult(),(result -> {
-        ImageView logoImage = (ImageView) findViewById(R.id.logoImage);
-        drawableName = "ic_logo_00";
-        int imageID = data.getIntExtra("imageID", R.id.teamid00);
-        if (imageID == R.id.teamid00) {
-            drawableName = "ic_logo_00";
-        } else if (imageID == R.id.teamid01) {
-            drawableName = "ic_logo_01";
-        } else if (imageID == R.id.teamid02) {
-            drawableName = "ic_logo_02";
-        } else if (imageID == R.id.teamid03) {
-            drawableName = "ic_logo_03";
-        } else if (imageID == R.id.teamid04) {
-            drawableName = "ic_logo_04";
-        } else if (imageID == R.id.teamid05) {
-            drawableName = "ic_logo_05";
-        } else {
-            drawableName = "ic_logo_00";
-        }
-        int resID = getResources().getIdentifier(drawableName, "drawable",
-                getPackageName());
-        logoImage.setImageResource(resID);
+    public void setLogo(View view) {
+
+        Intent intent = new Intent(this, LogoSelectActivity.class);
+        logoLauncher.launch(intent);
     }
 
     public void openInGoogleMaps (View view) {
@@ -71,43 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 ConfirmationActivity.class);
         intent.putExtra("teamInfo", team);
         startActivity(intent);
-    }
-
-    public void setTeamLogo(View view) {
-        //Creating a Return intent to pass to the Main Activity
-        Intent returnIntent = new Intent();
-
-        //Figuring out which image was clicked
-        ImageView selectedImage = (ImageView) view;
-
-        //Adding stuff to the return intent
-        returnIntent.putExtra("imageID",
-                selectedImage.getId());
-        setResult(RESULT_OK, returnIntent);
-
-        //Finishing Activity and return to main screen!
-        finish();
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_confirmation);
-
-        Intent intent = getIntent();
-        Team team = (Team) getIntent().getSerializableExtra("teamInfo");
-
-        TextView teamName = (TextView) findViewById(R.id.teamNameTextViewId);
-        teamName.setText(team.getName());
-
-        TextView teamPostalCode = (TextView) findViewById(R.id.postalCodeTextViewId);
-        teamPostalCode.setText(team.getPostalCode());
-
-        ImageView logoImage = (ImageView) findViewById(R.id.teamLogoId);
-
-        int resID = getResources().getIdentifier(team.getDrawableName(), "drawable",
-                getPackageName());
-        logoImage.setImageResource(resID);
     }
 }
 
